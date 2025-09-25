@@ -1,0 +1,5 @@
+insert:
+INSERT INTO organizations (name) VALUES (?);
+
+update:
+UPDATE organizations SET name = ? WHERE id = ?;
