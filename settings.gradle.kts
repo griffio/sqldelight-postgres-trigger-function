@@ -15,8 +15,8 @@ rootProject.name = "sqldelight-postgres-trigger"
 dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {
-            val vSqlDelight = "2.2.0-SNAPSHOT"
-            plugin("kotlin", "org.jetbrains.kotlin.jvm").version("2.0.20")
+            val vSqlDelight = "2.3.0-SNAPSHOT"
+            plugin("kotlin", "org.jetbrains.kotlin.jvm").version("2.2.21")
             plugin("sqldelight", "app.cash.sqldelight").version(vSqlDelight)
             plugin("flyway", "org.flywaydb.flyway").version("10.1.0")
             library("sqldelight-jdbc-driver", "app.cash.sqldelight:jdbc-driver:$vSqlDelight")
