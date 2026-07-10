@@ -1,14 +1,16 @@
 # SqlDelight 2.2.x Postgresql trigger support
 
-Experimental SqlDelight 2.2.x Postgresql Trigger support.
+* Experimental SqlDelight 2.2.x Postgresql Trigger support.
 
 Support for triggers is still experimental. 
 
 See `src/main/sqldelight/griffio/migrations/V1__Initial_version.sqm` for all supported syntax.
 
-Best used with migration `.sqm` files.
+Best used with migration `.sqm` files as the ordering of statements is preserved.
 
-Triggers and Triggers functions are defined in the same `.sqm` file.
+Triggers and Triggers functions must be defined in the same `.sqm` file.
+
+* Syntax
 
 `CREATE OR REPLACE FUNCTION ...` and `CREATE OR REPLACE TRIGGER ...`
 
@@ -27,3 +29,7 @@ createdb trigger-examples &&
 ./gradlew build &&
 ./gradlew flywayMigrate
 ```
+
+* Support `RAISE`statment - 
+  * MERGED https://github.com/sqldelight/sqldelight/pull/6297
+ 
