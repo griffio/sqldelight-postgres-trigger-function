@@ -1,0 +1,3 @@
+insert:
+INSERT INTO orders (product_id, quantity) VALUES (?, ?)
+RETURNING id, product_id, quantity;

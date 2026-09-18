@@ -1,0 +1,6 @@
+insert:
+INSERT INTO products (name, stock) VALUES (?, ?)
+RETURNING id, name, stock;
+
+selectById:
+SELECT id, name, stock FROM products WHERE id = ?;

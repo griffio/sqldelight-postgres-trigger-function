@@ -1,5 +1,5 @@
 CREATE TABLE accounts(
-  id INTEGER GENERATED ALWAYS AS IDENTITY,
+  id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   balance REAL
 );
 
@@ -27,7 +27,7 @@ FOR EACH ROW
 EXECUTE FUNCTION account_audit_update();
 
 CREATE TABLE organizations (
-  id INTEGER GENERATED ALWAYS AS IDENTITY,
+  id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   name TEXT NOT NULL,
   updated_at TIMESTAMP DEFAULT NOW() NOT NULL
 );
@@ -115,3 +115,62 @@ CREATE TRIGGER process_emp_audit
 AFTER INSERT OR UPDATE OR DELETE
 ON emp
 FOR EACH ROW EXECUTE FUNCTION process_emp_audit();
+
+
+CREATE OR REPLACE FUNCTION accounts_check_balance()
+RETURNS TRIGGER LANGUAGE PLPGSQL AS $$
+BEGIN
+
+    DELETE FROM accounts WHERE id = new.id;
+
+    IF NOT FOUND THEN
+      RAISE EXCEPTION 'account id not found %', new.id;
+    END IF;
+
+    RETURN new;
+END;
+$$;
+
+CREATE OR REPLACE TRIGGER accounts_check_balance
+    BEFORE UPDATE OF balance ON accounts
+    FOR EACH ROW
+    EXECUTE FUNCTION accounts_check_balance();
+
+-- RAISE followed by UPDATE inside the same trigger function body.
+-- Placing an order validates the quantity (RAISE EXCEPTION), logs the change (RAISE NOTICE),
+-- then updates the stock on products (UPDATE) and raises again if nothing was updated.
+CREATE TABLE products (
+  id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  name TEXT NOT NULL,
+  stock INTEGER NOT NULL
+);
+
+CREATE TABLE orders (
+  id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  product_id INTEGER NOT NULL,
+  quantity INTEGER NOT NULL
+);
+
+CREATE OR REPLACE FUNCTION orders_reduce_stock()
+RETURNS TRIGGER LANGUAGE PLPGSQL AS $$
+BEGIN
+    IF new.quantity <= 0 THEN
+        RAISE EXCEPTION 'order quantity must be positive, got %', new.quantity USING ERRCODE = 'check_violation';
+    END IF;
+
+    RAISE NOTICE 'reducing stock of product % by %', new.product_id, new.quantity;
+
+    UPDATE products SET stock = stock - new.quantity WHERE id = new.product_id AND stock >= new.quantity;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'insufficient stock for product % to order %', new.product_id, new.quantity USING ERRCODE = 'check_violation';
+    END IF;
+
+    RETURN new;
+END;
+$$;
+
+CREATE OR REPLACE TRIGGER orders_reduce_stock
+    BEFORE INSERT ON orders
+    FOR EACH ROW
+    EXECUTE FUNCTION orders_reduce_stock();
