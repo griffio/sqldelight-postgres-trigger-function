@@ -1,6 +1,6 @@
-# SqlDelight 2.2.x Postgresql trigger support
+# SqlDelight 2.4.0 Postgresql trigger support
 
-* Experimental SqlDelight 2.2.x Postgresql Trigger support.
+* Experimental SqlDelight 2.4.0 Postgresql Trigger support.
 
 Support for triggers is still experimental. 
 
@@ -33,3 +33,8 @@ createdb trigger-examples &&
 * Support `RAISE`statment - 
   * MERGED https://github.com/sqldelight/sqldelight/pull/6297
  
+  * `RAISE EXCEPTION | WARNING | NOTICE 'message %', arg [USING ERRCODE = '...']`
+
+* Support `INSERT`, `UPDATE` and `DELETE` statements in the trigger body with `IF FOUND` / `IF NOT FOUND`.
+
+See `orders_reduce_stock` in `V1__Initial_version.sqm` for `RAISE` followed by `UPDATE` in the same trigger function.
